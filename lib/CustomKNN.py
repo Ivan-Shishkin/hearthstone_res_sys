@@ -90,7 +90,7 @@ class CustomKNN:
 
         self.df_train = None
 
-        self.cards_features = pd.read_csv('df_mage_cards_all.csv')
+        self.cards_features = pd.read_csv('top_card_rates/df_mage_cards_all.csv')
         self.cards_features.set_index('id', inplace=True)
 
         df_cards_vectors = self.cards_features[['is_battlecry_card',
