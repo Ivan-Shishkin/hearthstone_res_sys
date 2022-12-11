@@ -3,15 +3,29 @@ import pandas as pd
 import surprise
 
 from tqdm import tqdm
+
 tqdm.pandas()
 
 
 class CustomSVD:
 
-    def __init__(self, n_factors=30, biased=True, num_of_preds=2):
+    def __init__(
+            self,
+            n_factors=200,
+            n_epochs=512,
+            lr_all=0.05,
+            reg_all=0.01,
+            random_state=1234,
+            biased=True,
+            num_of_preds=2
+    ):
 
         self.cards_features = pd.read_csv('../data/cards.csv')
         self.n_factors = n_factors
+        self.n_n_epochs = n_epochs
+        self.lr_all = lr_all
+        self.reg_all = reg_all
+        self.random_state = random_state
         self.biased = biased
         self.number_of_top_cards = 50
         self.num_of_preds = num_of_preds
@@ -164,7 +178,14 @@ class CustomSVD:
         ds = surprise.Dataset.load_from_df(train_dataset, reader)
 
         # set model config
-        funkSVD = surprise.prediction_algorithms.matrix_factorization.SVD(n_factors=self.n_factors, biased=self.biased)
+        funkSVD = surprise.prediction_algorithms.matrix_factorization.SVD(
+            n_factors=self.n_factors,
+            n_n_epochs=self.n_n_epochs,
+            lr_all=self.lr_all,
+            reg_all=self.reg_all,
+            random_state=self.random_state,
+            biased=self.biased
+        )
 
         # train model
         train = ds.build_full_trainset()
@@ -210,5 +231,6 @@ class CustomSVD:
         preds = self.model.test(list_to_predict)
         df_preds = pd.DataFrame([[x.iid, x.est] for x in preds], columns=['card', 'rate'])
         df_preds.sort_values(by='rate', ascending=False, inplace=True)
+        df_preds.reset_index(drop=True, inplace=True)
 
         return df_preds.iloc[:self.num_of_preds]
